@@ -95,7 +95,7 @@ class PsmEnv(SurRoLGoalEnv):
         # return - (d > self.distance_threshold).astype(np.float32)
         return self._is_success(achieved_goal, desired_goal).astype(np.float32) - 1.
 
-    def _env_setup(self,goal_plot=True):
+    def _env_setup(self,goal_plot=False):
         # camera
         if self._render_mode == 'human':
             reset_camera(yaw=90.0, pitch=-30.0, dist=0.82 * self.SCALING,
@@ -128,7 +128,7 @@ class PsmEnv(SurRoLGoalEnv):
             self.obj_ids['fixed'].append(obj_id)  # 0
         else: 
             obj_id = p.loadURDF(os.path.join(ASSET_DIR_PATH, 'sphere/sphere.urdf'),
-                                globalScaling=0.000001) #visually remove
+                                globalScaling=0.01) #visually remove
             self.obj_ids['fixed'].append(obj_id)  # 0    
         # print(f'goal:{obj_id}')
         pass  # need to implement based on every task
