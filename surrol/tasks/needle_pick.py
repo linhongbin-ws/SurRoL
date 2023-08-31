@@ -49,8 +49,12 @@ class NeedlePick(PsmEnv):
             #              target=(-0.05 * self.SCALING, 0, 0.36 * self.SCALING))
             reset_camera(yaw=89.60, pitch=-56, dist=5.98,
                          target=(-0.13, 0.03,-0.94))
+        
         self.ecm = Ecm((0.15, 0.0, 0.8524), #p.getQuaternionFromEuler((0, 30 / 180 * np.pi, 0)),
                        scaling=self.SCALING)
+        if not hasattr(self, "ecm_rtb"):
+            self.ecm_rtb = self.ecm.make_rtb_robot()
+        self.ecm.robot = self.ecm_rtb
         self.ecm.reset_joint(self.QPOS_ECM)
         # p.setPhysicsEngineParameter(enableFileCaching=0,numSolverIterations=10,numSubSteps=128,contactBreakingThreshold=2)
 

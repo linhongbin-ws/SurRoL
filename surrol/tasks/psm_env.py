@@ -46,6 +46,8 @@ class PsmEnv(SurRoLGoalEnv):
     # WORKSPACE_LIMITS1 = ((0.50, 0.60), (-0.05, 0.05), (0.675, 0.785))
     SCALING = 1.
 
+    psm1 = None
+
     def __init__(self,
                  render_mode=None, cid = -1):
         # workspace
@@ -103,7 +105,10 @@ class PsmEnv(SurRoLGoalEnv):
 
         # robot
         self.psm1 = Psm1(self.POSE_PSM1[0], p.getQuaternionFromEuler(self.POSE_PSM1[1]),
-                         scaling=self.SCALING)
+                            scaling=self.SCALING)
+        if not hasattr(self, "psm1_rtb"):
+            self.psm1_rtb = self.psm1.make_rtb_robot()
+        self.psm1.robot = self.psm1_rtb
         self.psm1_eul = np.array(p.getEulerFromQuaternion(
             self.psm1.pose_rcm2world(self.psm1.get_current_position(), 'tuple')[1]))  # in the world frame
         if self.ACTION_MODE == 'yaw':

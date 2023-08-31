@@ -78,14 +78,15 @@ class Arm(object):
         # self._add_constraint()  # have effect when the joint positions are not set
 
         # use roboticstoolbox to calculate the forward and inverse kinematics quickly
-        links = []
-        for i in range(self.DoF):
-            # DH parameters
-            if self.JOINT_TYPES[i] == 'R':
-                links.append(rtb.RevoluteMDH(alpha=self.ALPHA[i], a=self.A[i], d=self.D[i], offset=self.THETA[i]))
-            else:
-                links.append(rtb.PrismaticMDH(alpha=self.ALPHA[i], a=self.A[i], theta=self.THETA[i], offset=self.D[i]))
-        self.robot = rtb.DHRobot(links, name=self.NAME)
+        # links = []
+        # for i in range(self.DoF):
+        #     # DH parameters
+        #     if self.JOINT_TYPES[i] == 'R':
+        #         links.append(rtb.RevoluteMDH(alpha=self.ALPHA[i], a=self.A[i], d=self.D[i], offset=self.THETA[i]))
+        #     else:
+        #         links.append(rtb.PrismaticMDH(alpha=self.ALPHA[i], a=self.A[i], theta=self.THETA[i], offset=self.D[i]))
+        # self.robot = rtb.DHRobot(links, name=self.NAME)
+    
 
     def get_current_position(self) -> np.ndarray:
         """ Get the 'current cartesian position' of the arm (RCM frame).
@@ -342,3 +343,13 @@ class Arm(object):
         """ Set if there is any constraint to maintain the parallel link.
         """
         pass
+
+    def make_rtb_robot(self):
+        links = []
+        for i in range(self.DoF):
+            # DH parameters
+            if self.JOINT_TYPES[i] == 'R':
+                links.append(rtb.RevoluteMDH(alpha=self.ALPHA[i], a=self.A[i], d=self.D[i], offset=self.THETA[i]))
+            else:
+                links.append(rtb.PrismaticMDH(alpha=self.ALPHA[i], a=self.A[i], theta=self.THETA[i], offset=self.D[i]))
+        return rtb.DHRobot(links, name=self.NAME)
