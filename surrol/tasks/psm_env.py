@@ -128,7 +128,7 @@ class PsmEnv(SurRoLGoalEnv):
             self.obj_ids['fixed'].append(obj_id)  # 0
         else: 
             obj_id = p.loadURDF(os.path.join(ASSET_DIR_PATH, 'sphere/sphere.urdf'),
-                                globalScaling=0.000001) #visually remove
+                                globalScaling=0.01) #visually remove
             self.obj_ids['fixed'].append(obj_id)  # 0    
         # print(f'goal:{obj_id}')
         pass  # need to implement based on every task
