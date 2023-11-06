@@ -95,7 +95,7 @@ class PsmEnv(SurRoLGoalEnv):
         # return - (d > self.distance_threshold).astype(np.float32)
         return self._is_success(achieved_goal, desired_goal).astype(np.float32) - 1.
 
-    def _env_setup(self,goal_plot=True):
+    def _env_setup(self,goal_plot=False):
         # camera
         if self._render_mode == 'human':
             reset_camera(yaw=90.0, pitch=-30.0, dist=0.82 * self.SCALING,
