@@ -206,8 +206,8 @@ class PsmEnv(SurRoLGoalEnv):
         pose_world = self.psm1.pose_rcm2world(self.psm1.get_current_position())
         workspace_limits = self.workspace_limits1
         pose_world[:3, 3] = np.clip(pose_world[:3, 3] + action[:3],
-                                    workspace_limits[:, 0] - [0.02, 0.02, 0.],
-                                    workspace_limits[:, 1] + [0.02, 0.02, 0.08])  # clip to ensure convergence
+                                    workspace_limits[:, 0] - [0.00, 0.00, 0.],
+                                    workspace_limits[:, 1] + [0.00, 0.00, 0.08])  # clip to ensure convergence
         rot = get_euler_from_matrix(pose_world[:3, :3])
         if self.ACTION_MODE == 'yaw':
             action[3] *= np.deg2rad(20)  # yaw, limit maximum change in rotation
