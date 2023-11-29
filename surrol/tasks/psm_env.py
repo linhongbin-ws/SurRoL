@@ -64,6 +64,11 @@ class PsmEnv(SurRoLGoalEnv):
         self.block_gripper = True
         self._activated = -1
         self._max_constraint_id = 1
+        self._is_gripper_close = True
+        self._is_gripper_close_prv = self._is_gripper_close
+        self._jump_sig = (not self._is_gripper_close_prv) and self._is_gripper_close
+        self._jump_sig_prv = self._jump_sig
+        
         super(PsmEnv, self).__init__(render_mode, cid)
 
         # distance_threshold
@@ -219,16 +224,32 @@ class PsmEnv(SurRoLGoalEnv):
         self.psm1.move(action_rcm)
         # time2 = time.time()
 
+        self._is_gripper_close_prv = self._is_gripper_close
+        self._jump_sig_prv = self._jump_sig
         # jaw
         if self.block_gripper:
             action[4] = -1
         if action[4] < 0:
             self.psm1.close_jaw()
-            self._activate(0)
+            self._is_gripper_close = True
+            self._jump_sig = (not self._is_gripper_close_prv) and self._is_gripper_close
+            
+            if self._jump_sig_prv:
+                self._activate(0)
+            else:
+                pass
+                # if not self.check_remain_contact() and not self._contact_constraint is None:
+                #     print("Exception: remove constrain while gripper")
+                #     self._release(self._activated)
+                
         else:
             self.psm1.move_jaw(np.deg2rad(40))  # open jaw angle; can tune
+            self._is_gripper_close = False
+            self._jump_sig = (not self._is_gripper_close_prv) and self._is_gripper_close
             self._release(0)
-
+        
+        print("kkkkk activated :",self._activated)
+        print("jump sig:",self._jump_sig,self._jump_sig_prv)
         # time3 = time.time()
         # print("transform time: {:.4f}, IK time: {:.4f}, jaw time: {:.4f}, total time: {:.4f}"
         #       .format(time1 - time0, time2 - time1, time3 - time2, time3 - time0))
@@ -248,7 +269,7 @@ class PsmEnv(SurRoLGoalEnv):
         """ Remove the contact constraint if no contacts
         """
         if self.block_gripper or not self.has_object or self._activated < 0:
-            # print(f'skip{self.block_gripper} {self.has_object} {self._activated}')
+            print(f'skip{self.block_gripper} {self.has_object} {self._activated}')
             return
         # if demo:
         if self._contact_constraint is None:
@@ -293,28 +314,48 @@ class PsmEnv(SurRoLGoalEnv):
             # self._contact_constraint is not None
             # the gripper grasp the object; to check if they remain contact
             # pass
-            psm = self.psm1 if self._activated == 0 else self.psm2
-            # points = p.getContactPoints(bodyA=psm.body, linkIndexA=6) \
-            #          + p.getContactPoints(bodyA=psm.body, linkIndexA=7)
-            points_1 = p.getContactPoints(bodyA=psm.body, linkIndexA=6)
-            points_2 = p.getContactPoints(bodyA=psm.body, linkIndexA=7)
-            points_1 = [point[2] for point in points_1 if point[2] in self.obj_ids['rigid']]
-            points_2 = [point[2] for point in points_2 if point[2] in self.obj_ids['rigid']]
-            intersect = list(set(points_1)&set(points_2))
-            # if len(intersect) > 0:
-            #     contact_Id = intersect[-1]
-            # else:
-            #     contact_Id = -100
-            # points = [point for point in points if point[2] == contact_Id]
-            # remain_contact = len(points) > 0
-            remain_contact = len(intersect) > 0
+            # psm = self.psm1 if self._activated == 0 else self.psm2
+            # # points = p.getContactPoints(bodyA=psm.body, linkIndexA=6) \
+            # #          + p.getContactPoints(bodyA=psm.body, linkIndexA=7)
+            # points_1 = p.getContactPoints(bodyA=psm.body, linkIndexA=6)
+            # points_2 = p.getContactPoints(bodyA=psm.body, linkIndexA=7)
+            # points_1 = [point[2] for point in points_1 if point[2] in self.obj_ids['rigid']]
+            # points_2 = [point[2] for point in points_2 if point[2] in self.obj_ids['rigid']]
+            # intersect = list(set(points_1)&set(points_2))
+            # # if len(intersect) > 0:
+            # #     contact_Id = intersect[-1]
+            # # else:
+            # #     contact_Id = -100
+            # # points = [point for point in points if point[2] == contact_Id]
+            # # remain_contact = len(points) > 0
+            # remain_contact = len(intersect) > 0
 
-            if not remain_contact and not self._contact_approx:
+            if not self.check_remain_contact() and not self._contact_approx:
                 # release the previously grasped object because there is no contact any more
                 # print("no contact!remove constraint!")
                 self._release(self._activated)
         # print(f'num of constraints for stepcallback: {p.getNumConstraints()}')
+        for i in range(int(0.1 * 240)):
+            p.stepSimulation()
 
+    def check_remain_contact(self):
+        psm = self.psm1 
+        # points = p.getContactPoints(bodyA=psm.body, linkIndexA=6) \
+        #          + p.getContactPoints(bodyA=psm.body, linkIndexA=7)
+        points_1 = p.getContactPoints(bodyA=psm.body, linkIndexA=6)
+        points_2 = p.getContactPoints(bodyA=psm.body, linkIndexA=7)
+        points_1 = [point[2] for point in points_1 if point[2] in self.obj_ids['rigid']]
+        points_2 = [point[2] for point in points_2 if point[2] in self.obj_ids['rigid']]
+        intersect = list(set(points_1)&set(points_2))
+        # if len(intersect) > 0:
+        #     contact_Id = intersect[-1]
+        # else:
+        #     contact_Id = -100
+        # points = [point for point in points if point[2] == contact_Id]
+        # remain_contact = len(points) > 0
+        remain_contact = len(intersect) > 0
+        return remain_contact
+    
     def _sample_goal(self) -> np.ndarray:
         """ Samples a new goal and returns it.
         """
@@ -333,6 +374,7 @@ class PsmEnv(SurRoLGoalEnv):
         # check if the gripper closed and grasped something
         if self.block_gripper:
             return
+
         if self._activated < 0:
             # only activate one psm
             psm = self.psm1 if idx == 0 else self.psm2
