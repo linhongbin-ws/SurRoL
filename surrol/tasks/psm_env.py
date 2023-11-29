@@ -248,8 +248,8 @@ class PsmEnv(SurRoLGoalEnv):
             self._jump_sig = (not self._is_gripper_close_prv) and self._is_gripper_close
             self._release(0)
         
-        print("kkkkk activated :",self._activated)
-        print("jump sig:",self._jump_sig,self._jump_sig_prv)
+        # print("kkkkk activated :",self._activated)
+        # print("jump sig:",self._jump_sig,self._jump_sig_prv)
         # time3 = time.time()
         # print("transform time: {:.4f}, IK time: {:.4f}, jaw time: {:.4f}, total time: {:.4f}"
         #       .format(time1 - time0, time2 - time1, time3 - time2, time3 - time0))
@@ -269,7 +269,7 @@ class PsmEnv(SurRoLGoalEnv):
         """ Remove the contact constraint if no contacts
         """
         if self.block_gripper or not self.has_object or self._activated < 0:
-            print(f'skip{self.block_gripper} {self.has_object} {self._activated}')
+            # print(f'skip{self.block_gripper} {self.has_object} {self._activated}')
             return
         # if demo:
         if self._contact_constraint is None:
