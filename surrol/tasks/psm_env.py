@@ -335,8 +335,9 @@ class PsmEnv(SurRoLGoalEnv):
                 # print("no contact!remove constraint!")
                 self._release(self._activated)
         # print(f'num of constraints for stepcallback: {p.getNumConstraints()}')
-        for i in range(int(0.1 * 240)):
-            p.stepSimulation()
+        # for i in range(int(0.1 * 240)):
+        p.stepSimulation()
+        # print("kkkkk activated :",self._activated)
 
     def check_remain_contact(self):
         psm = self.psm1 
