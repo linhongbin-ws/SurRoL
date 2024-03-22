@@ -5,6 +5,7 @@ from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 import subprocess
+import fnmatch
 
 
 def check_directories():
@@ -52,6 +53,28 @@ class PostDevelopCommand(develop):
         install_submodules()
 
 
+def find_data_files(package_dir, patterns, excludes=()):
+  """Recursively finds files whose names match the given shell patterns."""
+  paths = set()
+
+  def is_excluded(s):
+    for exclude in excludes:
+      if fnmatch.fnmatch(s, exclude):
+        return True
+    return False
+
+  for directory, _, filenames in os.walk(package_dir):
+    if is_excluded(directory):
+      continue
+    for pattern in patterns:
+      for filename in fnmatch.filter(filenames, pattern):
+        # NB: paths must be relative to the package directory.
+        relative_dirpath = os.path.relpath(directory, package_dir)
+        full_path = os.path.join(relative_dirpath, filename)
+        if not is_excluded(full_path):
+          paths.add(full_path)
+  return list(paths)
+
 if __name__ == '__main__':
     setup(
         name='surrol',
@@ -63,6 +86,14 @@ if __name__ == '__main__':
         packages=[
             'surrol', 'surrol.gym', 'surrol.tasks', 'surrol.utils', 'surrol.robots', 'surrol.gui',
         ],
+        package_data={
+        'surrol':
+            find_data_files(
+                package_dir='surrol',
+                patterns=[
+                    '*.obj','*.mtl','*.urdf','*.obj','*.jpg','*.png','*.txt',
+                ],),
+        },
         python_requires = '>=3.7',
         install_requires=[
             "gym>=0.15.6",
