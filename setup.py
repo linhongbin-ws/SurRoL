@@ -91,7 +91,7 @@ if __name__ == '__main__':
             find_data_files(
                 package_dir='surrol',
                 patterns=[
-                    '*.obj','*.mtl','*.urdf','*.obj','*.jpg','*.png','*.txt',
+                    '*.obj','*.mtl','*.urdf','*.obj','*.jpg','*.png','*.txt','*.STL',
                 ],),
         },
         python_requires = '>=3.7',
