@@ -61,7 +61,7 @@ if __name__ == '__main__':
         author='Med-AIR@CUHK',
         keywords='simulation, medical robotics, dVRK, reinforcement learning',
         packages=[
-            'surrol',
+            'surrol', 'surrol.gym', 'surrol.tasks', 'surrol.utils', 'surrol.robots', 'surrol.gui',
         ],
         python_requires = '>=3.7',
         install_requires=[
