@@ -42,7 +42,7 @@ class PsmEnv(SurRoLGoalEnv):
     POSE_TABLE = ((0.5, 0, 0.001), (0, 0, 0))
     # original limits
     WORKSPACE_LIMITS1 = ((0.50, 0.60), (-0.05, 0.05), (0.675, 0.745))
-    #modified limits for peg_board
+    # modified limits for peg_board
     # WORKSPACE_LIMITS1 = ((0.50, 0.60), (-0.05, 0.05), (0.675, 0.785))
     SCALING = 1.
 
@@ -68,7 +68,9 @@ class PsmEnv(SurRoLGoalEnv):
         self._is_gripper_close_prv = self._is_gripper_close
         self._jump_sig = (not self._is_gripper_close_prv) and self._is_gripper_close
         self._jump_sig_prv = self._jump_sig
-        
+
+        self._init_stuff_constraint = None
+
         super(PsmEnv, self).__init__(render_mode, cid)
 
         # distance_threshold
@@ -233,7 +235,7 @@ class PsmEnv(SurRoLGoalEnv):
             self.psm1.close_jaw()
             self._is_gripper_close = True
             self._jump_sig = (not self._is_gripper_close_prv) and self._is_gripper_close
-            
+
             if self._jump_sig_prv:
                 self._activate(0)
             else:
@@ -241,13 +243,13 @@ class PsmEnv(SurRoLGoalEnv):
                 # if not self.check_remain_contact() and not self._contact_constraint is None:
                 #     print("Exception: remove constrain while gripper")
                 #     self._release(self._activated)
-                
+
         else:
             self.psm1.move_jaw(np.deg2rad(40))  # open jaw angle; can tune
             self._is_gripper_close = False
             self._jump_sig = (not self._is_gripper_close_prv) and self._is_gripper_close
             self._release(0)
-        
+
         # print("kkkkk activated :",self._activated)
         # print("jump sig:",self._jump_sig,self._jump_sig_prv)
         # time3 = time.time()
@@ -294,7 +296,12 @@ class PsmEnv(SurRoLGoalEnv):
                     world_to_body = p.invertTransform(body_pose[0], body_pose[1])
                     obj_to_body = p.multiplyTransforms(world_to_body[0],
                                                     world_to_body[1],
-                                                    obj_pose[0], obj_pose[1])                
+                                                    obj_pose[0], obj_pose[1])   
+                    if self._init_stuff_constraint is not None:
+                        p.changeConstraint(self._init_stuff_constraint, maxForce=0)
+                        p.removeConstraint(self._init_stuff_constraint)
+                        self._init_stuff_constraint = None
+                        # p.stepSimulation()
 
                     self._contact_constraint = p.createConstraint(
                         parentBodyUniqueId=psm.body,
@@ -310,6 +317,7 @@ class PsmEnv(SurRoLGoalEnv):
                     # TODO: check the maxForce; very subtle
                     # print(f'contact with {contact_Id}!create constraint id{self._contact_constraint}!')
                     p.changeConstraint(self._contact_constraint, maxForce=20)
+
         else:
             # self._contact_constraint is not None
             # the gripper grasp the object; to check if they remain contact
@@ -356,7 +364,7 @@ class PsmEnv(SurRoLGoalEnv):
         # remain_contact = len(points) > 0
         remain_contact = len(intersect) > 0
         return remain_contact
-    
+
     def _sample_goal(self) -> np.ndarray:
         """ Samples a new goal and returns it.
         """
@@ -426,7 +434,6 @@ class PsmEnv(SurRoLGoalEnv):
                     # p.changeConstraint(self._contact_constraint, maxForce=0)
                     # self._contact_constraint = None
                     # print(f"#(constraint)?{p.getNumConstraints()}!")
-
 
                     # enable collision
                     # psm = self.psm1 if idx == 0 else self.psm2
