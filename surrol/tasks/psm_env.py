@@ -123,10 +123,10 @@ class PsmEnv(SurRoLGoalEnv):
         self._contact_constraint = None
         self._contact_approx = False
 
-        p.loadURDF(os.path.join(ASSET_DIR_PATH, 'table/table.urdf'),
-                   np.array(self.POSE_TABLE[0]) * self.SCALING,
-                   p.getQuaternionFromEuler(self.POSE_TABLE[1]),
-                   globalScaling=self.SCALING)
+        # p.loadURDF(os.path.join(ASSET_DIR_PATH, 'table/table.urdf'),
+        #            np.array(self.POSE_TABLE[0]) * self.SCALING,
+        #            p.getQuaternionFromEuler(self.POSE_TABLE[1]),
+        #            globalScaling=self.SCALING)
 
         # for goal plotting
         if goal_plot:
